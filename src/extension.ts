@@ -1,17 +1,20 @@
 import * as vscode from 'vscode';
 import { basename } from 'path';
+import { merge } from 'lodash';
 
 const developmentPath = 'src/';
 const testsPath = 'tests/unit/specs/';
 
-interface Getters {
-	list: Array<string>,
+enum StoreMethod {
+	Getters = 'getters',
+	Actions = 'actions',
+	State = 'state',
 }
 
 class TemplateBuilder {
 	fileName: string = '';
 	filePath: string = '';
-	getters: { [key: string]: Array<string> } = {};
+	storeMappings: { [key: string]: { [key: string]: Array<string> } } = {};
 
 	setFileName(fileName: string): TemplateBuilder {
 		this.fileName = fileName;
@@ -25,32 +28,39 @@ class TemplateBuilder {
 		return this;
 	}
 
-	addGetters(namespace: string, listOfGetters: Array<string>) {
-		this.getters = { ...this.getters, [namespace]: listOfGetters };
-
-		return this;
+	addStoreMappings(storeMappings: { [key: string]: { [key: string]: Array<string> } }) {
+		this.storeMappings = storeMappings;
 	}
 
 	getGettres() {
-		return Object.entries(this.getters).map(([key, array]) => {
-			const keys = array
-				.map((el: string) => `${el}: jest.fn(),\n      `)
+		return Object.entries(this.storeMappings).map(([key, storeMethod]) => {
+			const storeMethodMocked = Object.entries(storeMethod).map(([key, array]) => {
+				const keys = array
+					.map((el: string) => `${el}: jest.fn()\n      `)
+					.reduce((acc: string, curr: string) => (`${acc}${curr}`), '')
+					.trim()
+					.replace(/\n$/, "");
+
+				return `
+    ${key}: {
+      ${keys},
+    },`;
+			})
 				.reduce((acc: string, curr: string) => (`${acc}${curr}`), '')
 				.trim()
-				.replace(/\n$/, "");
+				.replace(/^\n/, "");
 
 			return `
   ${key}: {
-    getters: {
-      ${keys}
-    },
+	  ${storeMethodMocked}
   },`;
-		}).reduce((acc: string, curr: string) => (`${acc}${curr}`), '')
-		.replace(/^\n/, "");
+		})
+			.reduce((acc: string, curr: string) => (`${acc}${curr}`), '')
+			.trim()
+			.replace(/^\n/, "");
 	}
 
 	getTempate(): string {
-		console.log(this.getGettres());
 		return `
 import { shallowMount } from '@vue/test-utils'
 
@@ -63,20 +73,20 @@ ${this.getGettres()}
 })
 
 const createWrapper = () => shallowMount(${this.fileName}, {
-	localVue,
-	store,
+  localVue,
+  store,
 })
 
 describe('${this.fileName}', () => {
-	beforeEach(() => {
-		jest.clearAllMocks()
-	})
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
 
-	it('renders', () => {
-		const wrapper = createWrapper()
+  it('renders', () => {
+    const wrapper = createWrapper()
 
-		expect(wrapper.exists()).toBeTrue()
-	})
+    expect(wrapper.exists()).toBeTrue()
+  })
 })
 `;
 	}
@@ -114,19 +124,52 @@ class TestsFileGenerator {
 		});
 	}
 
-	getFileContent(){
+	extrudeStore() {
 		vscode.workspace.openTextDocument(this.fullPath).then((document) => {
 			const text = document.getText();
-			const getters = text.match(/...mapGetters\(([^\(.]+)]\),/gs);
-			console.log(getters);
-			getters?.forEach(getter => {
-				const namesaceName = getter.match(/(?<=...mapGetters\(')([^\(.]+)(?=', \[)/gs)?.[0] || '';
-				const gettersList: any = getter.match(/(?<=\[)(.*)\'(?=,)/gs)?.[0];
-				const gettersNames: Array<string> = JSON.parse(`{ "list": [${gettersList.replace(/\'/gs, '"')}] }`)?.list;
+			const getters = this.extrudeStoreMethod(text, StoreMethod.Getters);
+			const actions = this.extrudeStoreMethod(text, StoreMethod.Actions);
+			const state = this.extrudeStoreMethod(text, StoreMethod.State);
 
-				this.templateBuilder.addGetters(namesaceName, gettersNames);
-			});
+			const extrudedStoreMappings = merge(
+				this.mapWithNamespace(getters, StoreMethod.Getters),
+				this.mapWithNamespace(actions, StoreMethod.Actions),
+				this.mapWithNamespace(state, StoreMethod.State),
+			);
+
+			this.templateBuilder.addStoreMappings(extrudedStoreMappings);
 		});
+	}
+
+	extrudeStoreMethod(text: String, type: StoreMethod): RegExpMatchArray {
+		const storeMethodExtrudingRegexp = {
+			[StoreMethod.Getters]: /...mapGetters\(([^\(.]+)]\),/gs,
+			[StoreMethod.Actions]: /...mapActions\(([^\(.]+)]\),/gs,
+			[StoreMethod.State]: /...mapState\(([^\(.]+)]\),/gs,
+		};
+
+		return text.match(storeMethodExtrudingRegexp[type]) || [];
+	}
+
+	mapWithNamespace(getters: RegExpMatchArray, type: StoreMethod) {
+		const storeMethodExtrudingRegexp = {
+			[StoreMethod.Getters]: /(?<=...mapGetters\(')([^\(.]+)(?=', \[)/gs,
+			[StoreMethod.Actions]: /(?<=...mapActions\(')([^\(.]+)(?=', \[)/gs,
+			[StoreMethod.State]: /(?<=...mapState\(')([^\(.]+)(?=', \[)/gs,
+		};
+
+		return getters.reduce((acc, curr) => {
+			const namesaceName = curr.match(storeMethodExtrudingRegexp[type])?.[0] || '';
+			const gettersList: any = curr.match(/(?<=\[)(.*)\'(?=,)/gs)?.[0];
+			const gettersNames: Array<string> = JSON.parse(`{ "list": [${gettersList.replace(/\'/gs, '"')}] }`)?.list;
+
+			return {
+				...acc,
+				[namesaceName]: {
+					[type]: gettersNames,
+				}
+			};
+		}, {});
 	}
 
 	insertGeneratedContent() {
@@ -146,7 +189,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const currentFilePath = vscode.window.activeTextEditor?.document?.fileName || '';
 		if (currentFilePath) {
 			const generator = new TestsFileGenerator(currentFilePath);
-			generator.getFileContent();
+			generator.extrudeStore();
 			generator.create();
 			// const templateBuilder = new TemplateBuilder()
 			// 	.setFileName('Array')
