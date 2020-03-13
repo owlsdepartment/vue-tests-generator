@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage('Cannot create test for unnamed file!');
 		}
 	});
-
+ 
 	context.subscriptions.push(disposable);
 }
 

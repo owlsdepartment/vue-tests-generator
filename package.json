@@ -44,7 +44,6 @@
 	},
 	"dependencies": {
 		"@types/lodash": "^4.14.149",
-		"js-beautify": "^1.10.3",
 		"lodash": "^4.17.15"
 	}
 }
