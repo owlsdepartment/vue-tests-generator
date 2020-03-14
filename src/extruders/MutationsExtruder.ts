@@ -1,18 +1,18 @@
 import StoreExtruder from "./StoreExtruder";
 import { StoreMethod } from "../enums";
 
-export default class StateExtruder extends StoreExtruder {
+export default class MutationsExtruder extends StoreExtruder {
   constructor(fileContent: string) {
-    super(fileContent, StoreMethod.State);
+    super(fileContent, StoreMethod.Mutations);
   }
 
   getStoreMappingsExtrudingRegexp(): RegExp {
-    return /...mapState\(([^\(.]+)]\),/gs;
+    return /...mapMutations\(([^\(.]+)]\),/gs;
   }
   getNamespaceExtrudingMethod(): RegExp {
-    return /(?<=...mapState\(')([^\(.]+)(?=', \[)/gs;
+    return /(?<=...mapMutations\(')([^\(.]+)(?=', \[)/gs;
   }
   getMappingValue(): string {
-    return '{}';
+    return 'jest.fn()';
   }
 }

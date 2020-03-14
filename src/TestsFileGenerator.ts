@@ -12,6 +12,7 @@ import {
   GettersExtruder,
   ActionsExtruder,
   StateExtruder,
+  MutationsExtruder,
 } from './extruders';
 
 const developmentPath = 'src/';
@@ -56,6 +57,7 @@ export default class TestsFileGenerator {
         new GettersExtruder(text),
         new ActionsExtruder(text),
         new StateExtruder(text),
+        new MutationsExtruder(text),
       ];
       const extrudedStoreMappings = storeExtruders
         .map(extruder => extruder.mapWithNamespace());

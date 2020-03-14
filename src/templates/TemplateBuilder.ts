@@ -35,9 +35,10 @@ export default class TemplateBuilder {
   }
 
   getMockedStore() {
+    console.log(JSON.stringify(this.storeMappings, null, 2).replace(/\"/gs, ''));
     return JSON.stringify(this.storeMappings, null, 2)
-      .replace(/^(?!(.*{))((?!,).)*$/gm, '$&,')
       .replace(/\"/gs, '')
+      .replace(/^(?!(.*{$))((?!,).)*$/gm, '$&,')
       .replace(/,$/gs, '');
   }
 

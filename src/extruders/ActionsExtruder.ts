@@ -13,6 +13,6 @@ export default class ActionsExtruder extends StoreExtruder {
     return /(?<=...mapActions\(')([^\(.]+)(?=', \[)/gs;
   }
   getMappingValue(): string {
-    return 'jest.fn(),';
+    return 'jest.fn()';
   }
 }

@@ -13,6 +13,6 @@ export default class GettersExtruder extends StoreExtruder {
     return /(?<=...mapGetters\(')([^\(.]+)(?=', \[)/gs;
   }
   getMappingValue(): string {
-    return 'jest.fn(),';
+    return 'jest.fn()';
   }
 }
