@@ -15,9 +15,9 @@
 		"onCommand:extension.createTest"
 	],
 	"repository": {
-    "type": "git",
-    "url": "https://github.com/owlsdepartment/vue-tests-generator.git"
-  },
+		"type": "git",
+		"url": "https://github.com/owlsdepartment/vue-tests-generator.git"
+	},
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
