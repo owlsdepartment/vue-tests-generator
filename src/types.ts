@@ -1,6 +1,7 @@
-export type Configuration =  {
-  developmentPath: string,
-  testsPath: string,
+export type Configuration = {
+  developmentPath: string;
+  testsPath: string;
+  testsHelpersPath: string;
 };
 
 export enum StoreMethod {
@@ -13,4 +14,9 @@ export enum StoreMethod {
 export enum Template {
   Main,
   Dummy,
+}
+
+export enum GenerateMode {
+  Basic,
+  WithStore,
 }
