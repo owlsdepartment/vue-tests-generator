@@ -1,7 +1,7 @@
 {
-	"name": "vue-tests-utils",
-	"displayName": "Vue tests utils",
-	"description": "Vue tests utils",
+	"name": "vue-tests-generator",
+	"displayName": "Vue tests generator",
+	"description": "Vue tests generator",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.43.0"
