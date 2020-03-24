@@ -16,8 +16,8 @@ import {
   MutationsExtruder,
 } from './extruders';
 
-const defaultDevelopmentPath = 'sre/';
-const defaultTestsPath = 'teste/unit/specs/';
+const defaultDevelopmentPath = 'src/';
+const defaultTestsPath = 'tests/unit/specs/';
 
 export default class TestsFileGenerator {
   testFilePath: string;

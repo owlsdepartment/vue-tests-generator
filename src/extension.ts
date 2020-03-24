@@ -5,7 +5,7 @@ import TestsFileGenerator from './TestsFileGenerator';
 export function activate(context: vscode.ExtensionContext) {
 	let disposable = vscode.commands.registerCommand('extension.createTest', () => {
 		const currentFilePath = vscode.window.activeTextEditor?.document?.fileName || '';
-		const config = vscode.workspace.getConfiguration('vue-test-utils');
+		const config = vscode.workspace.getConfiguration('vue-tests-generator');
 		const {
 			developmentPath,
 			testsPath,
