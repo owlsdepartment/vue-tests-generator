@@ -3,10 +3,11 @@ import { basename } from 'path';
 import { merge } from 'lodash';
 
 import TemplateBuilder from './templates/TemplateBuilder';
+import type { Configuration } from './types';
 import {
   StoreMethod,
   Template,
-} from './enums';
+} from './types';
 import {
   StoreExtruder,
   GettersExtruder,
@@ -15,23 +16,33 @@ import {
   MutationsExtruder,
 } from './extruders';
 
-const developmentPath = 'src/';
-const testsPath = 'tests/unit/specs/';
+const defaultDevelopmentPath = 'sre/';
+const defaultTestsPath = 'teste/unit/specs/';
 
 export default class TestsFileGenerator {
   testFilePath: string;
   templateBuilder: TemplateBuilder;
   fullPath: string;
+  config: Configuration;
 
-  constructor(currentFilePath: string) {
-    const [basePath, relativeFilePath] = currentFilePath.split(developmentPath);
+  constructor(config: Configuration,currentFilePath: string) {
+    this.config = config;
+    const [basePath, relativeFilePath] = currentFilePath.split(this.getDevelopmentPath());
     const fileName = basename(currentFilePath).replace('.vue', '');
 
     this.fullPath = currentFilePath;
-    this.testFilePath = `${basePath}${testsPath}${relativeFilePath}`.replace('.vue', '.spec.js');
+    this.testFilePath = `${basePath}${this.getTestsPath()}${relativeFilePath}`.replace('.vue', '.spec.js');
     this.templateBuilder = new TemplateBuilder(Template.Main)
       .setFileName(fileName)
       .setPath(relativeFilePath);
+  }
+
+  getDevelopmentPath() {
+    return this.config?.developmentPath || defaultDevelopmentPath;
+  }
+
+  getTestsPath() {
+    return this.config?.testsPath || defaultTestsPath;
   }
 
   getTestFileUri(): vscode.Uri {

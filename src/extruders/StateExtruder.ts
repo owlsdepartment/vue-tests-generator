@@ -1,5 +1,5 @@
 import StoreExtruder from "./StoreExtruder";
-import { StoreMethod } from "../enums";
+import { StoreMethod } from '../types';
 
 export default class StateExtruder extends StoreExtruder {
   constructor(fileContent: string) {

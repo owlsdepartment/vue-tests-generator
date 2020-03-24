@@ -1,4 +1,4 @@
-import { StoreMethod } from "../enums";
+import { StoreMethod } from '../types';
 
 export default abstract class StoreExtruder {
   type: StoreMethod;

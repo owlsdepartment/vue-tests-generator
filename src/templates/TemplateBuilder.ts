@@ -1,7 +1,7 @@
 import TemplateFactory from './TemplateFactory';
 import MainTemplate from './MainTemplate';
 import DummyTemplate from './DummyTemplate';
-import { Template } from '../enums';  
+import { Template } from '../types';
 
 export default class TemplateBuilder {
   fileName: string = '';
@@ -35,7 +35,6 @@ export default class TemplateBuilder {
   }
 
   getMockedStore() {
-    console.log(JSON.stringify(this.storeMappings, null, 2).replace(/\"/gs, ''));
     return JSON.stringify(this.storeMappings, null, 2)
       .replace(/\"/gs, '')
       .replace(/^(?!(.*{$))((?!,).)*$/gm, '$&,')

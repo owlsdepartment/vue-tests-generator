@@ -1,3 +1,8 @@
+export type Configuration =  {
+  developmentPath: string,
+  testsPath: string,
+};
+
 export enum StoreMethod {
   Getters = 'getters',
   Actions = 'actions',
