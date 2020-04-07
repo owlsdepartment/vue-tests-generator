@@ -3,6 +3,7 @@ import GettersExtruder from './GettersExtruder';
 import StateExtruder from './StateExtruder';
 import StoreExtruder from './StoreExtruder';
 import MutationsExtruder from './MutationsExtruder';
+import RouterExtruder from './RouterExtruder';
 
 export {
   ActionsExtruder,
@@ -10,4 +11,5 @@ export {
   StateExtruder,
   StoreExtruder,
   MutationsExtruder,
+  RouterExtruder,
 };

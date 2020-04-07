@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
 				developmentPath,
 				testsPath,
 			}, currentFilePath);
-			generator.extrudeStore();
+			generator.extrude();
 			generator.create();
 		} else {
 			vscode.window.showErrorMessage('Cannot create test for unnamed file!');

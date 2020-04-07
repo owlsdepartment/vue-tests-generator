@@ -7,6 +7,7 @@ export default class TemplateBuilder {
   fileName: string = '';
   filePath: string = '';
   storeMappings: { [key: string]: { [key: string]: Array<string> } } = {};
+  routerMappings: { [key: string]: { [key: string]: Array<string> } } = {};
   templateFactory: TemplateFactory;
 
   constructor(template: Template) {
@@ -34,8 +35,20 @@ export default class TemplateBuilder {
     this.storeMappings = storeMappings;
   }
 
+  setRouterMappings(routerMappings: { [key: string]: { [key: string]: Array<string> } }) {
+    this.routerMappings = routerMappings;
+  }
+
   getMockedStore() {
-    return JSON.stringify(this.storeMappings, null, 2)
+    return this.convertObjectToString(this.storeMappings);;
+  }
+
+  getMockedRouter() {
+    return this.convertObjectToString(this.routerMappings);
+  }
+
+  convertObjectToString(object: {}) {
+    return JSON.stringify(object, null, 2)
       .replace(/\"/gs, '')
       .replace(/^(?!(.*{$))((?!,).)*$/gm, '$&,')
       .replace(/,$/gs, '');
@@ -48,6 +61,7 @@ export default class TemplateBuilder {
       fileName,
       filePath,
       mockedStore: this.getMockedStore(),
+      mockedRouter: this.getMockedRouter(),
     });
   }
 }

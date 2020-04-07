@@ -14,6 +14,7 @@ import {
   ActionsExtruder,
   StateExtruder,
   MutationsExtruder,
+  RouterExtruder,
 } from './extruders';
 
 const defaultDevelopmentPath = 'src/';
@@ -61,21 +62,33 @@ export default class TestsFileGenerator {
     });
   }
 
-  extrudeStore(): void {
+  extrude(): void {
     vscode.workspace.openTextDocument(this.fullPath).then((document) => {
       const text = document.getText();
-      const storeExtruders: Array<StoreExtruder> = [
-        new GettersExtruder(text),
-        new ActionsExtruder(text),
-        new StateExtruder(text),
-        new MutationsExtruder(text),
-      ];
-      const extrudedStoreMappings = storeExtruders
-        .map(extruder => extruder.mapWithNamespace());
-      const mappedStore = merge(...(extrudedStoreMappings as [{}, {}, {}]));
-
-      this.templateBuilder.setStoreMappings(mappedStore);
+      this.extrudeStore(text);
+      this.extrudeRouter(text);
     });
+  }
+
+  extrudeStore(text: string): void {
+    const storeExtruders: Array<StoreExtruder> = [
+      new GettersExtruder(text),
+      new ActionsExtruder(text),
+      new StateExtruder(text),
+      new MutationsExtruder(text),
+    ];
+    const extrudedStoreMappings = storeExtruders
+      .map(extruder => extruder.mapWithNamespace());
+    const mappedStore = merge(...(extrudedStoreMappings as [{}, {}, {}]));
+
+    this.templateBuilder.setStoreMappings(mappedStore);
+  }
+
+  extrudeRouter(text: string): void {
+    const routerExtruder = new RouterExtruder(text);
+    const mockedRouter = routerExtruder.getMockedRouter();
+
+    this.templateBuilder.setRouterMappings(mockedRouter);
   }
 
   insertGeneratedContent(): void {
