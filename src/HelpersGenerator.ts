@@ -2,12 +2,13 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 import type { Configuration } from './types';
+import { GeneratorInterface } from './GeneratorInterface';
 
 const defaultTestsHelpersPath = 'tests/unit/helpers/';
 const defaultDevelopmentPath = 'src/';
 const defaultTestsPath = 'tests/unit/specs/';
 
-export default class HelpersGenerator {
+export default class HelpersGenerator implements GeneratorInterface {
   config: Configuration;
   absoluteTestHelpersFilePath: string;
 
@@ -37,10 +38,14 @@ export default class HelpersGenerator {
     fs.readdir(dirPath, (err: any, files: any) => {
       files.forEach((file: any) => {
         const content = fs.readFileSync(`${dirPath}${file}`, 'utf8');
-        const path = vscode.Uri.file(`${this.absoluteTestHelpersFilePath}${file}`);
+        const pathString = `${this.absoluteTestHelpersFilePath}${file}`;
 
-        workspaceEdit.createFile(path, { ignoreIfExists: true });
-        workspaceEdit.insert(path, startOfFile, content);
+        if (!fs.existsSync(pathString)) {
+          const path = vscode.Uri.file(pathString);
+
+          workspaceEdit.createFile(path, { ignoreIfExists: true });
+          workspaceEdit.insert(path, startOfFile, content);
+        }
       });
       vscode.workspace.applyEdit(workspaceEdit);
     });

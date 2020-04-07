@@ -5,7 +5,9 @@ import ${fileName} from '@/${filePath}'
 
 import createStore from '%/unit/helpers/createStore'
 
-const { localVue, store } = createStore(${mockedStore})
+const storeObject = ${mockedStore}
+
+const { localVue, store } = createStore(storeObject)
 
 const createWrapper = () => shallowMount(${fileName}, {
   localVue,

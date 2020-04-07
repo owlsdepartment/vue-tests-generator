@@ -17,26 +17,29 @@ import {
   MutationsExtruder,
 } from './extruders';
 
+import { GeneratorInterface } from './GeneratorInterface';
+
 const defaultDevelopmentPath = 'src/';
 const defaultTestsPath = 'tests/unit/specs/';
 
-export default class TestsFileGenerator {
+export default class TestsFileGenerator implements GeneratorInterface {
   testFilePath: string;
   templateBuilder: TemplateBuilder;
   fullPath: string;
   config: Configuration;
+  gMode: GenerateMode;
 
-  constructor(config: Configuration, currentFilePath: string) {
+  constructor(config: Configuration, currentFilePath: string, gMode: GenerateMode = GenerateMode.Basic) {
     this.config = config;
     const [basePath, relativeFilePath] = currentFilePath.split(this.getDevelopmentPath());
     const fileName = basename(currentFilePath).replace('.vue', '');
 
+    this.gMode = gMode;
     this.fullPath = currentFilePath;
     this.testFilePath = `${basePath}${this.getTestsPath()}${relativeFilePath}`.replace('.vue', '.spec.js');
     this.templateBuilder = new TemplateBuilder(Template.Main)
       .setFileName(fileName)
       .setPath(relativeFilePath);
-    this.generateHeleprsIfDontExist();
   }
 
   getDevelopmentPath() {
@@ -51,8 +54,8 @@ export default class TestsFileGenerator {
     return vscode.Uri.file(this.testFilePath);
   }
 
-  create(gMode: GenerateMode = GenerateMode.Basic): void {
-    if (gMode === GenerateMode.WithStore) {
+  create(): void {
+    if (this.gMode === GenerateMode.WithStore) {
       this.extrudeStore();
     }
 
@@ -91,22 +94,6 @@ export default class TestsFileGenerator {
     workspaceEdit.insert(this.getTestFileUri(), startOfFile, this.templateBuilder.getTemplate().replace(/\t/g, ""));
     vscode.workspace.applyEdit(workspaceEdit).then(() => {
       vscode.window.showInformationMessage('Template was generated!');
-    });
-  }
-
-  generateHeleprsIfDontExist(): void {
-    const workspaceEdit = new vscode.WorkspaceEdit();
-    const startOfFile = new vscode.Position(0, 0);
-
-    fs.readdir(`${__dirname}/../resources/helpers/`, (err: any, files: any) => {
-      files.forEach((file: any) => {
-        const content = fs.readFileSync(`${__dirname}/../resources/helpers/${file}`, 'utf8');
-        const path = vscode.Uri.file(`/Users/owls/Sites/changing-health/consumer/tests/helpers/${file}`);
-
-        workspaceEdit.createFile(path, { ignoreIfExists: true });
-        workspaceEdit.insert(path, startOfFile, content);
-      });
-      vscode.workspace.applyEdit(workspaceEdit);
     });
   }
 }
